@@ -40,3 +40,5 @@ RESOURCES += \
 
 QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CFLAGS += -std=c++0x
+
+OTHER_FILES +=

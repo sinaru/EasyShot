@@ -67,6 +67,9 @@ const QPixmap* ScreenShotter::getScreenshot()
 
 void ScreenShotter::playSound()
 {
+    if(!QFile::exists("sounds/camerashutter.wav"))
+        throw new ZException("Unable to find 'sounds/camerashutter.wav' file.");
+
     Phonon::MediaObject *music =
             Phonon::createPlayer(Phonon::MusicCategory,
                                  Phonon::MediaSource("sounds/camerashutter.wav"));

@@ -1,3 +1,4 @@
+#include <QDateTime>
 #include <iostream>
 using namespace std;
 
@@ -6,6 +7,9 @@ using namespace std;
 ZException::ZException(string message)
 {
     _message = message;
+
+    cout << "["<<QDateTime::currentDateTime().toString(Qt::TextDate).toUtf8().constData() <<
+            "] ZException: "<< message <<endl;
 }
 
 string ZException::reason()
