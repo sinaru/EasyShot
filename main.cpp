@@ -10,8 +10,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("SinaCodes");
     QCoreApplication::setApplicationName("EasyShot");
-    EasyShot app;
-    app.init();
-
+    EasyShot::app()->init();
     return a.exec();
 }

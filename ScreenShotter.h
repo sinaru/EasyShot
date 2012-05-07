@@ -12,7 +12,7 @@ public:
     bool hasScreenshot();
     const QPixmap* getScreenshot();
     void deleteScreenshot();
-    void playSound();
+
 
 private:
     void shootFullScreen();

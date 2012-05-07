@@ -4,7 +4,6 @@
 #include "AboutDialog.h"
 
 #include "EasyShot.h"
-#include "AppSettings.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,8 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     loadRelatedSettings();
     init();
 
-    //connect the window screenshot button click event to execute EasyShot::takeScreenshot()
-    connect(ui->screenshotButton, SIGNAL(clicked()), parent, SLOT(takeScreenshot()));
+    connect(ui->screenshotButton, SIGNAL(clicked()), EasyShot::app(), SLOT(takeScreenshot()));
 }
 
 void MainWindow::init()
@@ -49,16 +47,14 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::loadRelatedSettings()
 {
-    AppSettings settings;
-    _closeToTray = settings.getSetting(CloseToTray).toBool();
-    _initialWindowPos = settings.getSetting(MainWindowPos, QPoint(200,200))
+    _closeToTray = EasyShot::app()->settings()->getSetting(CloseToTray).toBool();
+    _initialWindowPos = EasyShot::app()->settings()->getSetting(MainWindowPos, QPoint(200,200))
             .toPoint();
 }
 
 void MainWindow::writeRelatedSettings()
 {
-    AppSettings settings;
-    settings.setSetting(MainWindowPos, pos());
+    EasyShot::app()->settings()->setSetting(MainWindowPos, pos());
 }
 
 void MainWindow::actionPreferenceDialog()

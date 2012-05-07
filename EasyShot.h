@@ -6,6 +6,7 @@
 #include <map>
 #include "MainWindow.h"
 #include "ScreenShotter.h"
+#include "AppSettings.h"
 
 class QSystemTrayIcon;
 
@@ -21,6 +22,9 @@ class EasyShot : public QWidget
 public:
     explicit EasyShot(QWidget *parent = 0);
     void init(bool force = false);
+    void playSound();
+    static EasyShot* app();
+    AppSettings* settings();
 
 signals:
     
@@ -33,6 +37,7 @@ private:
     QSystemTrayIcon *_trayIcon;
     MainWindow *_mainWindow;
     ScreenShotter *_screenshooter;
+    AppSettings *_settings;
     bool _initialized;
 };
 

@@ -9,24 +9,38 @@
 #include "MainWindow.h"
 #include "AppSettings.h"
 
+/**
+  use phonon plugin to play the shutter sound. Also referenced in the qt project file
+  */
+#include <phonon/audiooutput.h>
+#include <phonon/seekslider.h>
+#include <phonon/mediaobject.h>
+#include <phonon/volumeslider.h>
+#include <phonon/backendcapabilities.h>
+
 EasyShot::EasyShot(QWidget *parent) :
     QWidget(parent)
 {
     _initialized = false;
 }
 
+AppSettings* EasyShot::settings()
+{
+    return _settings;
+}
+
 void EasyShot::init(bool force)
 {
-    AppSettings settings;
-
     if(_initialized && !force)
     {
+        qDebug("EasyShot::init function already called.");
         return;
     }
 
+    _settings = new AppSettings();
 
     _mainWindow = new MainWindow(this);
-    bool startMinimized = settings.getSetting(StartMinimized, true).toBool();
+    bool startMinimized = _settings->getSetting(StartMinimized, false).toBool();
     if(startMinimized)
         _mainWindow->hide();
     else
@@ -65,16 +79,14 @@ void EasyShot::createTrayIcon()
 
 void EasyShot::takeScreenshot()
 {
-
-    AppSettings settings;
     ScreenShotter::ShootMode mode =
-            (ScreenShotter::ShootMode) (settings.getSetting(ShootingMode).toInt());
+            (ScreenShotter::ShootMode) (_settings->getSetting(ShootingMode).toInt());
 
     bool mainWindowVisible = _mainWindow->isVisible();
     if(mainWindowVisible)
         _mainWindow->hide();
 
-    sleep(1);// Wait till window closes
+   usleep(1000000);// Wait till window closes
     _screenshooter->takeShot(mode);
 
     if(!_screenshooter->hasScreenshot())
@@ -84,12 +96,17 @@ void EasyShot::takeScreenshot()
           return;
       }
 
+        if(_settings->getSetting(PlaySound,false).toBool())
+            playSound();
+
+
     //Have main window visible before save file dalog. Otherwise the program closes when save dialog is closed.
     _mainWindow->show();
 
     QString format = "png";
+    QString lastSavedLocation = _settings->getSetting(LastSavedLocation, "").toString();
 
-    QString initialPath = tr("/untitled.")+ format;
+    QString initialPath = lastSavedLocation+ "/untitled - "+QDateTime::currentDateTime().toString("dd-MM-yyyy hh-mm-ss")+ "."+ format;
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
                                                     initialPath,
@@ -103,12 +120,35 @@ void EasyShot::takeScreenshot()
         if(!saved)
         {
             std::cout << "Unable to save screenshot at: " << fileName.toStdString() <<std::endl;
+            return;
         }
+
+        QFileInfo path(fileName);
+        _settings->setSetting(LastSavedLocation, path.path());
+
     }
 
     //If main window was hidden before the screenshot is called, hide the main window again
     if(!mainWindowVisible)
         _mainWindow->hide();
+}
+
+void EasyShot::playSound()
+{
+    if(!QFile::exists("sounds/camerashutter.wav"))
+        throw new ZException("Unable to find 'sounds/camerashutter.wav' file.");
+
+    Phonon::MediaObject *music =
+            Phonon::createPlayer(Phonon::MusicCategory,
+                                 Phonon::MediaSource("sounds/camerashutter.wav"));
+    music->play();
+    qDebug("Music played from EasyShot::playSound() function");
+}
+
+EasyShot* EasyShot::app()
+{
+    static EasyShot *app = new EasyShot();
+    return app;
 }
 
 
